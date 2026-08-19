@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>개인정보처리방침 — 클래스픽 → 나이스 연간시간표 자동입력</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 100px;
+    color: #161b33;
+    line-height: 1.75;
+    font-size: 15px;
+  }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  .updated { color: #8890ab; font-size: 13px; margin-bottom: 36px; }
+  h2 { font-size: 17px; margin-top: 40px; margin-bottom: 10px; border-left: 4px solid #4361ee; padding-left: 10px; }
+  p, li { color: #3a4066; }
+  ul { padding-left: 20px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  th, td { border: 1px solid #eceffb; padding: 10px 12px; text-align: left; vertical-align: top; }
+  th { background: #f4f6fd; color: #6b7290; font-weight: 700; width: 26%; }
+  .badge { display: inline-block; background: #e9edff; color: #3046c4; border-radius: 6px; padding: 2px 8px; font-size: 12px; font-weight: 700; margin-right: 6px; }
+  footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid #eceffb; color: #a7b0c7; font-size: 13px; }
+  a { color: #4361ee; }
+</style>
+</head>
+<body>
+
+  <h1>개인정보처리방침</h1>
+  <div class="updated">클래스픽 → 나이스 연간시간표 자동입력 (Chrome 확장 프로그램) · 최종 수정일: 2026년 8월 19일</div>
+
+  <p>
+    본 개인정보처리방침은 Chrome 확장 프로그램 <b>"클래스픽 → 나이스 연간시간표 자동입력"</b>
+    (이하 "본 확장 프로그램")이 어떤 정보를 다루는지, 어떻게 처리하는지를 설명합니다.
+    본 확장 프로그램은 클래스픽(classpick.kr) 서비스와 별개로 배포되는 보조 도구이며,
+    이 문서는 본 확장 프로그램에만 적용됩니다.
+  </p>
+
+  <h2>1. 본 확장 프로그램의 목적</h2>
+  <p>
+    본 확장 프로그램은 클래스픽에서 작성한 초등학교 연간시간표 데이터를
+    나이스(NEIS, work.neis.go.kr) 학기별 시간표 관리 화면에 자동으로 입력해주는
+    단일 목적의 도구입니다. 그 외의 용도로는 사용되지 않습니다.
+  </p>
+
+  <h2>2. 수집·처리하는 정보</h2>
+  <table>
+    <tr><th>정보</th><td>클립보드에 복사해 둔 연간시간표 데이터 (요일·교시별 과목, 교사 이름 등)</td></tr>
+    <tr><th>처리 위치</th><td>사용자의 브라우저 내부(로컬)에서만 처리됩니다</td></tr>
+    <tr><th>외부 전송 여부</th><td>없음 — 나이스 서버, 클래스픽 서버, 그 외 어떤 외부 서버로도 전송되지 않습니다</td></tr>
+    <tr><th>저장 여부</th><td>Chrome의 <span class="badge">storage</span> API를 이용해 진행 상태(마지막 인식 결과 등)만 사용자의 브라우저 로컬에 저장하며, 이 데이터도 외부로 전송되지 않습니다</td></tr>
+  </table>
+
+  <p>
+    본 확장 프로그램은 나이스 계정 정보(아이디, 비밀번호, 로그인 세션, 쿠키 등)를
+    읽거나 저장하거나 전송하지 않습니다. 사용자가 나이스에 로그인하여 이미 열어 둔
+    화면에 시간표 데이터를 입력하는 동작만 수행합니다.
+  </p>
+
+  <h2>3. 권한 사용 목적</h2>
+  <table>
+    <tr><th><span class="badge">storage</span></th><td>설정 창(F2)에서 확인한 인식 결과(학기, 담임 이름, 진행 상황)를 확장 프로그램 내부에서 임시로 기억해 두기 위해 사용합니다.</td></tr>
+    <tr><th><span class="badge">scripting</span></th><td>나이스 시간표 화면에 F2 단축키로 설정 창을 띄우고, 시간표 셀을 순차적으로 클릭해 과목을 선택하는 자동입력 동작을 수행하기 위해 사용합니다.</td></tr>
+    <tr><th><span class="badge">activeTab</span></th><td>사용자가 확장 프로그램 아이콘을 클릭했을 때 현재 탭에서만 안내 화면을 표시하기 위해 사용합니다.</td></tr>
+    <tr><th><span class="badge">host_permissions</span><br/>(*.neis.go.kr)</th><td>본 확장 프로그램의 유일한 기능인 나이스 자동입력이 동작하는 데 필요한 범위이며, 그 외 도메인에는 접근하지 않습니다.</td></tr>
+  </table>
+
+  <h2>4. 제3자 제공 및 판매</h2>
+  <p>
+    본 확장 프로그램은 어떠한 사용자 데이터도 제3자에게 판매, 대여, 공유하지 않으며,
+    광고나 리마케팅, 신용평가, 대출 심사 등 사용자가 요청한 기능과 무관한 목적으로
+    사용하지 않습니다.
+  </p>
+
+  <h2>5. 원격 코드 사용 여부</h2>
+  <p>
+    본 확장 프로그램은 외부 서버로부터 실행 코드를 원격으로 불러오지 않습니다.
+    확장 프로그램 패키지에 포함된 코드만 실행됩니다.
+  </p>
+
+  <h2>6. 데이터 보관 및 삭제</h2>
+  <p>
+    로컬에 저장되는 진행 상태 정보는 사용자가 확장 프로그램을 삭제하거나
+    브라우저의 확장 프로그램 데이터를 지우면 함께 삭제됩니다. 별도의 서버에
+    데이터가 보관되지 않으므로, 확장 프로그램 삭제 시 모든 관련 데이터가
+    함께 제거됩니다.
+  </p>
+
+  <h2>7. 문의</h2>
+  <p>
+    본 개인정보처리방침이나 확장 프로그램 관련 문의는 아래로 연락해 주세요.
+  </p>
+  <p>
+    이메일: <a href="mailto:rhdidtjr4279@gmail.com">rhdidtjr4279@gmail.com</a><br/>
+    서비스: <a href="https://classpick.kr" target="_blank" rel="noopener">classpick.kr</a>
+  </p>
+
+  <h2>8. 변경 사항 고지</h2>
+  <p>
+    본 방침이 변경되는 경우 이 페이지에 갱신된 내용을 게시하며, 페이지 상단의
+    최종 수정일을 함께 업데이트합니다.
+  </p>
+
+  <footer>
+    © 2026 Classpick. 클래스픽 → 나이스 연간시간표 자동입력 확장 프로그램을 위한 개인정보처리방침입니다.
+  </footer>
+
+</body>
+</html>
