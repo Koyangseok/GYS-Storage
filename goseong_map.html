@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>경남 고성 지도</title>
 <style>
   html, body { margin:0; padding:0; height:100%; font-family: sans-serif; }
@@ -87,6 +88,46 @@
     box-sizing: border-box;
   }
   .btn-naver-review:hover { background-color: #02b350; }
+
+  /* ===== 모바일 대응 (화면 너비 480px 이하) ===== */
+  @media (max-width: 480px) {
+    #legend {
+      bottom:16px; left:16px;
+      padding:8px 12px;
+      font-size:13px;
+      line-height:1.5;
+    }
+    .dot { width:9px; height:9px; margin-right:5px; }
+
+    .marker-icon {
+      width: 16px;
+      height: 16px;
+      border-width: 3px;
+    }
+    .marker-label {
+      margin-top: 3px;
+      padding: 4px 8px;
+      font-size: 15px;
+      border-radius: 6px;
+    }
+
+    .modal-content {
+      width: 92%;
+      padding: 20px;
+      border-radius: 14px;
+    }
+    .modal-close {
+      font-size: 30px;
+      top: 10px; right: 14px;
+    }
+    .modal-title { font-size: 22px; }
+    .modal-category { font-size: 14px; }
+    .modal-address { font-size: 15px; }
+    .btn-naver-review {
+      padding: 15px 0;
+      font-size: 17px;
+    }
+  }
 </style>
 <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=dj7viqwfe9"></script>
 </head>
@@ -135,6 +176,13 @@ var places = [
   ["장백왕새우", 34.9445878, 128.2383572, "음식점", "경상남도 고성군 삼산면 장치2길 478"],
   ["청정수산왕새우", 34.9424719, 128.3068589, "음식점", "경상남도 고성군 삼산면 공룡로 2624-9"],
   ["해명새우", 34.9439872, 128.2439591, "음식점", "경상남도 고성군 삼산면 해명길 87-26"],
+
+  // 음식점 - 추가
+  ["대가돌솥밥", 35.001804, 128.3018649, "음식점", "경상남도 고성군 대가면 대가로 279-31"],
+  ["바닷가에 햇살 한스푼", 34.945763, 128.333495, "음식점", "경상남도 고성군 고성읍 신월로 157"],
+  ["총각네칼국수보쌈", 34.975074, 128.3283913, "음식점", "경상남도 고성군 고성읍 동외로156번길 46"],
+  ["오가리수제비", 34.9772973, 128.3258008, "음식점", "경상남도 고성군 고성읍 중앙로43번길 65-19"],
+  ["주식회사 남도수제갈비", 34.9745866, 128.3295766, "음식점", "경상남도 고성군 고성읍 남산로 93"],
 
   // 마트
   ["장보고마트", 34.9675527, 128.3199637, "마트", "경상남도 고성군 고성읍 남포로 49"],
