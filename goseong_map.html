@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>경남 고성 지도</title>
+<style>
+  html, body { margin:0; padding:0; height:100%; font-family: sans-serif; }
+  #map { width:100%; height:100%; }
+  #legend {
+    position:absolute; bottom:30px; left:30px; z-index:100;
+    background:white; padding:10px 14px; border:2px solid #333;
+    border-radius:6px; font-size:14px; line-height:1.6;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; }
+
+  /* 커스텀 마커 컨테이너 - transform 제거 */
+  .custom-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .marker-icon {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .marker-label {
+    margin-top: 2px;
+    padding: 2px 5px;
+    background: #ffffff;
+    border: 1px solid #666666;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #222222;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  /* 모달창 스타일 */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-content {
+    background: #fff;
+    width: 90%;
+    max-width: 380px;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+  }
+  .modal-close {
+    position: absolute;
+    top: 12px; right: 16px;
+    font-size: 24px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #888;
+  }
+  .modal-title { font-size: 20px; font-weight: bold; margin-bottom: 8px; color: #111; }
+  .modal-category { font-size: 13px; color: #007bff; margin-bottom: 8px; font-weight: bold; }
+  .modal-address { font-size: 14px; color: #555; margin-bottom: 20px; line-height: 1.4; }
+  .btn-naver-review {
+    display: block;
+    width: 100%;
+    padding: 12px 0;
+    background-color: #03cf5d;
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 15px;
+    border-radius: 6px;
+    box-sizing: border-box;
+  }
+  .btn-naver-review:hover { background-color: #02b350; }
+</style>
+<script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=dj7viqwfe9"></script>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="legend">
+  <b>범례</b><br>
+  <span class="dot" style="background:#e74c3c;"></span>음식점<br>
+  <span class="dot" style="background:#2980b9;"></span>마트<br>
+  <span class="dot" style="background:#7f8c8d;"></span>장소(관광지)<br>
+  <span class="dot" style="background:#f39c12;"></span>숙소
+</div>
+
+<div id="reviewModal" class="modal-overlay">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div id="modalCategory" class="modal-category">카테고리</div>
+    <div id="modalTitle" class="modal-title">장소명</div>
+    <div id="modalAddress" class="modal-address">주소 정보</div>
+    <a id="modalReviewBtn" href="#" target="_blank" class="btn-naver-review">N 네이버 리뷰 & 상세정보 보기</a>
+  </div>
+</div>
+
+<script>
+var places = [
+  // 음식점 - 한우
+  ["1호점한우", 34.9765339, 128.3167757, "음식점", "경남 고성군 고성읍 성내로 65-8"],
+  ["가야한우마을", 34.9992172, 128.3308097, "음식점", "경상남도 고성군 고성읍 우산2길 28-59"],
+  ["고성한우명가", 34.9754751, 128.3282665, "음식점", "경상남도 고성군 고성읍 동외로156번길 41"],
+  ["동그라미한우참숯불갈비", 35.0557496, 128.3656206, "음식점", "경상남도 고성군 회화면 배둔로 38"],
+  ["배둔한우마을", 35.0557496, 128.3656206, "음식점", "경상남도 고성군 회화면 배둔서길 19"],
+  ["암소한우전문 봄날정육식당", 34.9797, 128.3230, "음식점", "경상남도 고성군 고성읍 송학로113번길 9-10"],
+  ["오늘도 한우", 34.9765968, 128.3297282, "음식점", "경상남도 고성군 고성읍 동외로168번길 69"],
+  ["한우사랑", 34.9581942, 128.3305331, "음식점", "경상남도 고성군 고성읍 신월4길 5-26"],
+
+  // 음식점 - 새우
+  ["계림새우나라", 34.953871, 128.3333454, "음식점", "경상남도 고성군 고성읍 신월로 31"],
+  ["고성왕새우", 34.9616585, 128.3166962, "음식점", "경상남도 고성군 삼산면 공룡로 2976"],
+  ["곱뚜랑왕새우구이", 34.9522401, 128.3321691, "음식점", "경상남도 고성군 고성읍 신월로 172"],
+  ["공룡새우", 35.0557496, 128.3656206, "음식점", "경남 고성군 마암면 당항만로 687"],
+  ["굴이랑새우랑", 34.9622081, 128.3205649, "음식점", "경상남도 고성군 고성읍 공룡로 3026-4"],
+  ["일번수산왕새우", 34.9619784, 128.3204939, "음식점", "경상남도 고성군 고성읍 공룡로 3030"],
+  ["일품새우", 34.9522401, 128.3321691, "음식점", "경상남도 고성군 고성읍 신월로 63-23"],
+  ["장백왕새우", 34.9445878, 128.2383572, "음식점", "경상남도 고성군 삼산면 장치2길 478"],
+  ["청정수산왕새우", 34.9424719, 128.3068589, "음식점", "경상남도 고성군 삼산면 공룡로 2624-9"],
+  ["해명새우", 34.9439872, 128.2439591, "음식점", "경상남도 고성군 삼산면 해명길 87-26"],
+
+  // 마트
+  ["장보고마트", 34.9675527, 128.3199637, "마트", "경상남도 고성군 고성읍 남포로 49"],
+  ["풀마트 고성점", 34.9762904, 128.3301404, "마트", "경상남도 고성군 고성읍 동외로164번길 75"],
+
+  // 숙소 (노란색 표시)
+  ["라파엘", 35.0467392, 128.3825597, "숙소", "경남 고성군 회화면 당항만로 945"],
+  ["고성블루비치글램핑", 34.9258676, 128.2981556, "숙소", "경상남도 고성군 삼산면 두포5길 113-109"],
+
+  // 관광지
+  ["송학동고분군", 34.980353, 128.321354, "장소", "고성읍 송학리 470"],
+  ["학동마을 옛담장", 34.949370, 128.192088, "장소", "하일면 학림리 920-3"],
+  ["소을비포성지", 34.902237, 128.189675, "장소", "하일면 동화리 398-4"],
+  ["갈천서원", 35.048000, 128.251000, "장소", "대가면 갈천리 1146"],
+  ["고성향교", 34.976148, 128.308858, "장소", "고성읍 교사3길 41"],
+  ["상족암군립공원", 34.905098, 128.151124, "장소", "하이면 덕명리"],
+  ["갈모봉자연휴양림", 34.970748, 128.267893, "장소", "고성읍 갈모봉숲길 42"],
+  ["해지개다리", 34.954864, 128.330508, "장소", "고성읍 신월리 619-17"],
+  ["남산공원", 34.964745, 128.326847, "장소", "고성읍 수남리"],
+  ["고성박물관", 34.979319, 128.320940, "장소", "고성읍 송학리 475-1"],
+  ["고성탈박물관", 34.971072, 128.333800, "장소", "고성읍 율대2길 23"]
+];
+
+var CATEGORY_COLORS = {
+  "음식점": "#e74c3c",
+  "마트": "#2980b9",
+  "장소": "#7f8c8d",
+  "숙소": "#f39c12"
+};
+
+var map = new naver.maps.Map('map', {
+  center: new naver.maps.LatLng(34.975, 128.32),
+  zoom: 11
+});
+
+places.forEach(function(p) {
+  var name = p[0], lat = p[1], lng = p[2], category = p[3], address = p[4];
+  var color = CATEGORY_COLORS[category] || "#7f8c8d";
+
+  var markerContent = `
+    <div class="custom-marker">
+      <div class="marker-icon" style="background:${color};"></div>
+      <div class="marker-label">${name}</div>
+    </div>
+  `;
+
+  var marker = new naver.maps.Marker({
+    position: new naver.maps.LatLng(lat, lng),
+    map: map,
+    title: name,
+    icon: {
+      content: markerContent,
+      // 둥근 아이콘 점(12px) 중심을 정확히 기준점으로 잡도록 고정
+      anchor: new naver.maps.Point(8, 8),
+      anchorSkew: false
+    }
+  });
+
+  naver.maps.Event.addListener(marker, 'click', function() {
+    openModal(name, category, address);
+  });
+});
+
+function openModal(title, category, address) {
+  document.getElementById('modalTitle').innerText = title;
+  document.getElementById('modalCategory').innerText = "[" + category + "]";
+  document.getElementById('modalAddress').innerText = address;
+  
+  var searchQuery = encodeURIComponent("경남 고성 " + title);
+  document.getElementById('modalReviewBtn').href = "https://search.naver.com/search.naver?query=" + searchQuery;
+
+  document.getElementById('reviewModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('reviewModal').classList.remove('active');
+}
+
+document.getElementById('reviewModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeModal();
+  }
+});
+</script>
+</body>
+</html>
