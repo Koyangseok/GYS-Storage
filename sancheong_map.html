@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>경남 산청 지도</title>
+<style>
+  html, body { margin:0; padding:0; height:100%; font-family: sans-serif; }
+  #map { width:100%; height:100%; }
+  #legend {
+    display:none;
+  }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; }
+
+  /* 커스텀 마커 컨테이너 - transform 제거 */
+  .custom-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .marker-icon {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .marker-label {
+    margin-top: 2px;
+    padding: 2px 5px;
+    background: #ffffff;
+    border: 1px solid #666666;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #222222;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  /* 모달창 스타일 */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-content {
+    background: #fff;
+    width: 90%;
+    max-width: 380px;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+  }
+  .modal-close {
+    position: absolute;
+    top: 12px; right: 16px;
+    font-size: 24px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #888;
+  }
+  .modal-title { font-size: 20px; font-weight: bold; margin-bottom: 8px; color: #111; }
+  .modal-category { font-size: 13px; color: #007bff; margin-bottom: 8px; font-weight: bold; }
+  .modal-address { font-size: 14px; color: #555; margin-bottom: 20px; line-height: 1.4; }
+  .btn-naver-review {
+    display: block;
+    width: 100%;
+    padding: 12px 0;
+    background-color: #03cf5d;
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 15px;
+    border-radius: 6px;
+    box-sizing: border-box;
+  }
+  .btn-naver-review:hover { background-color: #02b350; }
+
+  /* ===== 모바일 대응 (화면 너비 480px 이하) ===== */
+  @media (max-width: 480px) {
+    #legend {
+      bottom:16px; left:16px;
+      padding:8px 12px;
+      font-size:13px;
+      line-height:1.5;
+    }
+    .dot { width:9px; height:9px; margin-right:5px; }
+
+    .marker-icon {
+      width: 16px;
+      height: 16px;
+      border-width: 3px;
+    }
+    .marker-label {
+      margin-top: 3px;
+      padding: 4px 8px;
+      font-size: 15px;
+      border-radius: 6px;
+    }
+
+    .modal-content {
+      width: 92%;
+      padding: 20px;
+      border-radius: 14px;
+    }
+    .modal-close {
+      font-size: 30px;
+      top: 10px; right: 14px;
+    }
+    .modal-title { font-size: 22px; }
+    .modal-category { font-size: 14px; }
+    .modal-address { font-size: 15px; }
+    .btn-naver-review {
+      padding: 15px 0;
+      font-size: 17px;
+    }
+  }
+</style>
+<script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=dj7viqwfe9"></script>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="legend">
+  <b>범례</b><br>
+  <span class="dot" style="background:#e74c3c;"></span>음식점<br>
+  <span class="dot" style="background:#2980b9;"></span>마트<br>
+  <span class="dot" style="background:#7f8c8d;"></span>지정관광지
+</div>
+
+<div id="reviewModal" class="modal-overlay">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div id="modalCategory" class="modal-category">카테고리</div>
+    <div id="modalTitle" class="modal-title">장소명</div>
+    <div id="modalAddress" class="modal-address">주소 정보</div>
+    <a id="modalReviewBtn" href="#" target="_blank" class="btn-naver-review">N 네이버 리뷰 & 상세정보 보기</a>
+  </div>
+</div>
+
+<script>
+var places = [
+  // 지정관광지 (회색)
+  ["정취암", 35.3550, 127.9600, "장소", "경남 산청군 신등면 둔철산로 675-87"],
+  ["동의보감촌", 35.4230, 127.7850, "장소", "경남 산청군 금서면 동의보감로555번길 61"],
+  ["남사예담촌", 35.2850, 127.8450, "장소", "경남 산청군 단성면 지리산대로2897번길 10"],
+  ["목면시배유지", 35.2920, 127.8650, "장소", "경남 산청군 단성면 목화로 887"],
+  ["수선사", 35.3980, 127.8950, "장소", "경남 산청군 산청읍 웅석봉로154번길 102-23"],
+  ["전구형왕릉", 35.4280, 127.7700, "장소", "경남 산청군 금서면 구형왕릉로 92-102"],
+  ["황매산 미리내파크", 35.4700, 128.0350, "장소", "경남 산청군 차황면 황매산로1202번길 210"],
+  ["남명조식유적", 35.3050, 127.7550, "장소", "경남 산청군 시천면 남명로 137"],
+  ["검외사", 35.2900, 127.8500, "장소", "경남 산청군 단성면 성철로 125"],
+  ["단성 묵곡생태숲", 35.2950, 127.8700, "장소", "경남 산청군 단성면 묵곡리 948"],
+  ["산청약초시장", 35.4150, 127.8850, "장소", "경남 산청군 금서면 친환경로2605번길 11"],
+  ["단계한옥마을", 35.3700, 127.9450, "장소", "경남 산청군 신등면 단계리 일원"],
+  ["생초국제조각공원", 35.4750, 127.7450, "장소", "경남 산청군 생초면 산수로 1064"],
+
+  // 음식점 (빨간색)
+  ["타짜오리하우스", 35.3650, 127.8500, "음식점", "경남 산청군 신안면 원지로 178"],
+  ["타짜오리하우스2호점", 35.4220, 127.7840, "음식점", "경남 산청군 금서면 동의보감로555번길 27"],
+  ["감나무집한우대가", 35.3600, 127.8480, "음식점", "경남 산청군 신안면 지리산대로 3939"],
+  ["다복한우촌식육식당", 35.3620, 127.8460, "음식점", "경남 산청군 신안면 지리산대로 3696"],
+  ["고향한우식육식당", 35.3660, 127.8510, "음식점", "경남 산청군 신안면 원지로4번길 33"],
+  ["원지한우정육코너", 35.3640, 127.8490, "음식점", "경남 산청군 신안면 원지로 70"],
+  ["찬미한우식육식당", 35.4740, 127.7460, "음식점", "경남 산청군 생초면 산수로 1044, 1층"],
+  ["합천삼가한우", 35.4160, 127.8830, "음식점", "경남 산청군 산청읍 친환경로 2687-4"],
+  ["우리한우", 35.4100, 127.8900, "음식점", "경남 산청군 산청읍 웅석봉로 32-3"],
+  ["산청한우숯불", 35.4120, 127.8870, "음식점", "경남 산청군 산청읍 꽃봉산로 122 1층"],
+  ["영실한우프라자", 35.2930, 127.8660, "음식점", "경남 산청군 단성면 목화로 912"],
+  ["한우물", 35.4140, 127.8820, "음식점", "경남 산청군 금서면 친환경로 2527"],
+  ["산청명품한우점", 35.4225, 127.7845, "음식점", "경남 산청군 금서면 동의보감로555번길 45-17"],
+
+  // 마트 (파란색)
+  ["탑 플러스 마트", 35.4145, 127.8905, "마트", "경남 산청군 산청읍 웅석봉로 14"]
+];
+
+var CATEGORY_COLORS = {
+  "음식점": "#e74c3c",
+  "마트": "#2980b9",
+  "장소": "#7f8c8d"
+};
+
+var map = new naver.maps.Map('map', {
+  center: new naver.maps.LatLng(35.41, 127.88),
+  zoom: 11
+});
+
+places.forEach(function(p) {
+  var name = p[0], lat = p[1], lng = p[2], category = p[3], address = p[4];
+  var color = CATEGORY_COLORS[category] || "#7f8c8d";
+
+  var markerContent = `
+    <div class="custom-marker">
+      <div class="marker-icon" style="background:${color};"></div>
+      <div class="marker-label">${name}</div>
+    </div>
+  `;
+
+  var marker = new naver.maps.Marker({
+    position: new naver.maps.LatLng(lat, lng),
+    map: map,
+    title: name,
+    icon: {
+      content: markerContent,
+      // 둥근 아이콘 점(12px) 중심을 정확히 기준점으로 잡도록 고정
+      anchor: new naver.maps.Point(8, 8),
+      anchorSkew: false
+    }
+  });
+
+  naver.maps.Event.addListener(marker, 'click', function() {
+    openModal(name, category, address);
+  });
+});
+
+function openModal(title, category, address) {
+  document.getElementById('modalTitle').innerText = title;
+  document.getElementById('modalCategory').innerText = "[" + category + "]";
+  document.getElementById('modalAddress').innerText = address;
+
+  var searchQuery = encodeURIComponent("경남 산청 " + title);
+  document.getElementById('modalReviewBtn').href = "https://search.naver.com/search.naver?query=" + searchQuery;
+
+  document.getElementById('reviewModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('reviewModal').classList.remove('active');
+}
+
+document.getElementById('reviewModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeModal();
+  }
+});
+</script>
+</body>
+</html>
